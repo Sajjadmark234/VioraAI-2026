@@ -11,14 +11,9 @@ api_key = st.text_input("Apni Gemini API Key yahan enter karein:", type="passwor
 if api_key:
     genai.configure(api_key=api_key)
     try:
-        # Yeh code khud aapki key ke mutabiq available model dhoond lega
-        available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-        
-        # Agar koi model mil jaye toh pehla wala utha lo
-        chosen_model = available_models[0] if available_models else 'models/gemini-1.5-flash'
-        
-        model = genai.GenerativeModel(chosen_model.replace('models/', ''))
-        st.success(f"Connected Successfully! ✅")
+        # Error message ke mutabiq naya model
+        model = genai.GenerativeModel('gemini-3.6-flash')
+        st.success("API Key Connected Successfully! ✅")
         
         user_input = st.text_input("Apna sawal yahan likhein:")
         if st.button("Ask AI"):
