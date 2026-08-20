@@ -6,13 +6,13 @@ st.set_page_config(page_title="Viora AI Assistant", page_icon="🤖")
 st.title("🤖 Viora AI Assistant")
 st.write("Welcome! Yeh aapka apna AI app hai.")
 
-# Seedha main page par API key aur sawal ka box
 api_key = st.text_input("Apni Gemini API Key yahan enter karein:", type="password")
 
 if api_key:
     genai.configure(api_key=api_key)
     try:
-        model = genai.GenerativeModel('gemini-pro')
+        # Latest aur stable model jo har account par chalta hai
+        model = genai.GenerativeModel('gemini-1.5-flash')
         st.success("API Key Connected Successfully! ✅")
         
         user_input = st.text_input("Apna sawal yahan likhein:")
