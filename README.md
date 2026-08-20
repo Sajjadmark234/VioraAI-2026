@@ -1,19 +1,31 @@
-# :earth_americas: GDP dashboard template
+import streamlit as st
+import google.generativeai as genai
 
-A simple Streamlit app showing the GDP of different countries in the world.
+st.set_page_config(page_title="Viora AI Assistant", page_icon="🤖")
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://gdp-dashboard-template.streamlit.app/)
+st.title("🤖 Viora AI Assistant")
+st.write("Welcome! Yeh aapka apna AI app hai.")
 
-### How to run it on your own machine
+st.sidebar.header("Settings")
+api_key = st.sidebar.text_input("Enter Gemini API Key:", type="password")
 
-1. Install the requirements
+if api_key:
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel('gemini-1.5-flash')
 
-   ```
-   $ pip install -r requirements.txt
-   ```
+    user_input = st.text_input("Apna sawal yahan likhein:")
 
-2. Run the app
-
-   ```
-   $ streamlit run streamlit_app.py
-   ```
+    if st.button("Ask AI"):
+        if user_input:
+            with st.spinner("AI is thinking..."):
+                try:
+                    response = model.generate_content(user_input)
+                    st.success("AI Response:")
+                    st.write(response.text)
+                except Exception as e:
+                    st.error(f"Error: {e}")
+        else:
+            st.warning("Pehle kuch type karein!")
+else:
+    st.sidebar.warning("Pehle apni API Key enter karein!")
+    st.info("👈 Left side (Sidebar) mein apni Gemini API Key enter karein taake app chal sake.")
