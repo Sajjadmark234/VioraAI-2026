@@ -9,23 +9,29 @@ st.write("Welcome! Yeh aapka apna AI app hai.")
 st.sidebar.header("Settings")
 api_key = st.sidebar.text_input("Enter Gemini API Key:", type="password")
 
-if api_key:
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+# Button taake aapko keyboard ka enter na dabana pade
+save_key = st.sidebar.button("Save API Key")
 
-    user_input = st.text_input("Apna sawal yahan likhein:")
-
-    if st.button("Ask AI"):
-        if user_input:
-            with st.spinner("AI is thinking..."):
-                try:
-                    response = model.generate_content(user_input)
-                    st.success("AI Response:")
-                    st.write(response.text)
-                except Exception as e:
-                    st.error(f"Error: {e}")
-        else:
-            st.warning("Pehle kuch type karein!")
+if save_key or api_key:
+    if api_key:
+        genai.configure(api_key=api_key)
+        try:
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            st.sidebar.success("API Key saved successfully! ✅")
+            
+            # Main chat area
+            user_input = st.text_input("Apna sawal yahan likhein:")
+            if st.button("Ask AI"):
+                if user_input:
+                    with st.spinner("AI is thinking..."):
+                        response = model.generate_content(user_input)
+                        st.success("AI Response:")
+                        st.write(response.text)
+                else:
+                    st.warning("Pehle kuch type karein!")
+        except Exception as e:
+            st.error(f"Error: {e}")
+    else:
+            st.sidebar.warning("Pehle apni API Key enter karein!")
 else:
-    st.sidebar.warning("Pehle apni API Key enter karein!")
-    st.info("👈 Left side (Sidebar) mein apni Gemini API Key enter karein taake app chal sake.")
+    st.sidebar.info("👈 API Key enter karke 'Save API Key' button dabayein.")
