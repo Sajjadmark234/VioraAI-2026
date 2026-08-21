@@ -7,7 +7,7 @@ from io import BytesIO
 # Page ki setting
 st.set_page_config(page_title="Viora AI Generator", page_icon="🤖")
 
-st.title("🤖 Viora AI Image Generator")
+st.title("🤖 Viora AI Generator")
 st.write("Welcome! Yahan aap chart analysis aur image generate karwa sakte hain.")
 
 # API Key input
@@ -27,7 +27,7 @@ if api_key:
         image = None
         if uploaded_file is not None:
             image = Image.open(uploaded_file)
-            st.image(image, caption="Uploaded Chart", use_column_width=True)
+            st.image(image, caption="Uploaded Chart")
 
         user_prompt = st.text_area("Apna sawal ya analysis ICT/SMC ke mutabiq likhein:")
         
@@ -60,7 +60,7 @@ if api_key:
                         response = requests.get(image_url)
                         if response.status_code == 200:
                             gen_image = Image.open(BytesIO(response.content))
-                            st.image(gen_image, caption=f"Generated: {img_prompt}", use_column_width=True)
+                            st.image(gen_image, caption=f"Generated: {img_prompt}")
                             st.download_button(
                                 label="💾 Download Generated Image",
                                 data=response.content,
