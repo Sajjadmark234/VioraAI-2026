@@ -13,8 +13,8 @@ api_key = st.text_input("Apni Gemini API Key yahan enter karein:", type="passwor
 if api_key:
     genai.configure(api_key=api_key)
     try:
-        # Stable model set karein
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # Naya aur working model set kiya hai
+        model = genai.GenerativeModel('gemini-3.6-flash')
         
         # Chat history ko yaad rakhne ke liye session state
         if "messages" not in st.session_state:
@@ -36,11 +36,7 @@ if api_key:
             # AI ka jawab generate karne ke liye
             with st.chat_message("assistant"):
                 with st.spinner("AI soch raha hai..."):
-                    # History ke sath chat session shuru karna
-                    chat_session = model.start_chat(history=[
-                        {"role": m["role"], "parts": [m["content"]]} for m in st.session_state.messages[:-1]
-                    ])
-                    response = chat_session.send_message(prompt)
+                    response = model.generate_content(prompt)
                     ai_reply = response.text
                     st.markdown(ai_reply)
             
