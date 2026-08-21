@@ -1,52 +1,80 @@
 import streamlit as st
 import google.generativeai as genai
 from PIL import Image
+import requests
+from io import BytesIO
 
-st.set_page_config(page_title="Viora AI Assistant", page_icon="🤖")
+# Page ki setting
+st.set_page_config(page_title="Viora AI Generator", page_icon="🤖")
 
-st.title("Assistant")
-st.write("Welcome! Yeh aapka apna AI app hai.")
+st.title("🤖 Viora AI Image Generator")
+st.write("Welcome! Yahan aap apne prompts se tasveeren generate karwa sakte hain.")
 
 # API Key input
 api_key = st.text_input("Apni Gemini API Key yahan enter karein:", type="password")
 
 if api_key:
     genai.configure(api_key=api_key)
-    st.success("API Key Connected Successfully! ✅")
     
-    try:
-        # Model set kiya hai
-        model = genai.GenerativeModel('gemini-3.6-flash')
-        
-        # 📷 Tasveer upload karne ka option
-        uploaded_file = st.file_uploader("Tasveer upload karein ya camera se lein:", type=["jpg", "jpeg", "png"])
+    # Tabs banate hain taake aap Text Assistant aur Image Generator dono use kar sakein
+    tab1, tab2 = st.tabs(["💬 Chart Analysis (Text)", "🖼️ Image Generator"])
+    
+    # --- Tab 1: Gemini Text Assistant (Pehle wala kam) ---
+    with tab1:
+        st.subheader("Chart Analysis Assistant")
+        uploaded_file = st.file_uploader("Analysis ke liye chart upload karein (optional):", type=["jpg", "jpeg", "png"])
         
         image = None
         if uploaded_file is not None:
-            # Tasveer ko PIL Image mein convert karna taake error na aaye
             image = Image.open(uploaded_file)
-            st.image(image, caption="Uploaded Image", use_container_width=True)
+            st.image(image, caption="Uploaded Chart", use_column_width=True)
 
-        # Sawal likhne ki jagah
-        user_input = st.text_area("Apna sawal yahan likhein:")
+        user_prompt = st.text_area("Apna sawal ya analysis ICT/SMC ke mutabiq likhein:")
         
-        if st.button("Ask AI"):
-            if user_input or image:
-                with st.spinner("AI jawab de raha hai..."):
-                    # Agar tasveer aur sawal dono hain
-                    if image is not None and user_input:
-                        response = model.generate_content([user_input, image])
-                    elif image is not None:
-                        response = model.generate_content(["Is chart ka analysis karo:", image])
+        if st.button("Ask AI Analysis"):
+            if user_prompt:
+                with st.spinner("AI analysis kar raha hai..."):
+                    model = genai.GenerativeModel('gemini-3.6-flash')
+                    if image:
+                        response = model.generate_content([user_prompt, image])
                     else:
-                        response = model.generate_content(user_input)
-                    
-                    st.markdown("### AI Response:")
+                        response = model.generate_content(user_prompt)
+                    st.markdown("### AI Analysis:")
                     st.write(response.text)
             else:
-                st.warning("Pehle kuch likhein ya tasveer upload karein.")
+                st.warning("Pehle kuch likhein.")
 
-    except Exception as e:
-        st.error(f"Error: {e}")
+    # --- Tab 2: Image Generator (Naya Feature) ---
+    with tab2:
+        st.subheader("Nayi Tasveer Generate Karein")
+        img_prompt = st.text_area("Tasveer ka tafseel (prompt) likhein (English mein behtar hai):", 
+                                 placeholder="e.g., A professional SMC trading chart of EURUSD showing a break of structure and imbalance")
+        
+        if st.button("Generate Image"):
+            if img_prompt:
+                with st.spinner("Tasveer generate ho rahi hai..."):
+                    # Hum Pollinations AI ki free API use kar rahe hain taake aapko tasveer mile
+                    safe_prompt = img_prompt.replace(" ", "%20")
+                    image_url = f"https://image.pollinations.ai/prompt/{safe_prompt}?width=1024&height=768&nologo=true"
+                    
+                    try:
+                        response = requests.get(image_url)
+                        if response.status_code == 200:
+                            gen_image = Image.open(BytesIO(response.content))
+                            st.image(gen_image, caption=f"Generated: {img_prompt}", use_column_width=True)
+                            # Download button bhi de rahe hain
+                            st.download_button(
+                                label="💾 Download Generated Image",
+                                data=response.content,
+                                file_name="viora_generated_image.jpg",
+                                mime="image/jpeg"
+                            )
+                        else:
+                            st.error("Tasveer generate karne mein error aaya.")
+                    except Exception as e:
+                        st.error(f"Error: {e}")
+            else:
+                st.warning("Pehle tasveer ka prompt likhein.")
+
 else:
-    st.info("👈 Pehle upar apni API Key enter karein.")
+    st.info("👈 Pehle API Key enter karein.")
