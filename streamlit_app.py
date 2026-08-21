@@ -4,7 +4,7 @@ from PIL import Image
 import requests
 from io import BytesIO
 
-# Page ki setting - Sirf Tab 2 wala hissa
+# Page ki setting
 st.set_page_config(page_title="Viora AI Generator", page_icon="🤖")
 
 st.title("🤖 Viora AI Generator")
@@ -19,7 +19,7 @@ if api_key:
     # Tabs banate hain
     tab1, tab2 = st.tabs(["💬 Chart Analysis (Text)", "🖼️ Image Generator"])
     
-    # --- Tab 1: Gemini Text Assistant (Pehle wala kam) ---
+    # --- Tab 1: Gemini Text Assistant ---
     with tab1:
         st.subheader("Chart Analysis Assistant")
         uploaded_file = st.file_uploader("Analysis ke liye chart upload karein (optional):", type=["jpg", "jpeg", "png"])
@@ -27,7 +27,7 @@ if api_key:
         image = None
         if uploaded_file is not None:
             image = Image.open(uploaded_file)
-            st.image(image, caption="Uploaded Chart", use_column_width=True)
+            st.image(image, caption="Uploaded Chart")
 
         user_prompt = st.text_area("Apna sawal ya analysis ICT/SMC ke mutabiq likhein:")
         
@@ -44,34 +44,29 @@ if api_key:
             else:
                 st.warning("Pehle kuch likhein.")
 
-    # --- Tab 2: Image Generator (Updated Stability) ---
+    # --- Tab 2: Image Generator ---
     with tab2:
         st.subheader("Nayi Tasveer Generate Karein")
         st.write("Tasveer ka tafseel (prompt) English mein likhein:")
         
-        # Default prompt for ICT Chart
         default_ict = "A professional forex trading chart of XAUUSD, clean candlestick pattern, white background, showing ICT concepts like Order Block, Fair Value Gap, and Liquidity Grab with precise labels"
         
         img_prompt = st.text_area("Tasveer ka prompt:", 
                                  value=default_ict,
-                                 height=150,
-                                 placeholder="e.g., A futuristic city at sunset with flying cars")
+                                 height=150)
         
         if st.button("Generate Image"):
             if img_prompt:
                 with st.spinner("Tasveer generate ho rahi hai... (kuch seconds wait karein)"):
-                    # Hum Pollinations AI ki updated free API use kar rahe hain
                     safe_prompt = img_prompt.replace(" ", "%20")
-                    # Model aur nologo add kiye hain
                     image_url = f"https://image.pollinations.ai/prompt/{safe_prompt}?width=1280&height=720&nologo=true&model=turbo"
                     
                     try:
-                        response = requests.get(image_url, timeout=30) # Timeout set kiya hai
+                        response = requests.get(image_url, timeout=30)
                         if response.status_code == 200:
                             gen_image = Image.open(BytesIO(response.content))
-                            st.image(gen_image, caption=f"Generated: {img_prompt}", use_column_width=True)
+                            st.image(gen_image, caption=f"Generated: {img_prompt}")
                             
-                            # Download button
                             st.download_button(
                                 label="💾 Download Generated Image",
                                 data=response.content,
@@ -79,9 +74,9 @@ if api_key:
                                 mime="image/jpeg"
                             )
                         else:
-                            st.error(f"Tasveer generate karne mein error aaya (Code: {response.status_code}). Free API busy ho sakti hai, dobara try karein.")
+                            st.error(f"Tasveer generate karne mein error aaya (Code: {response.status_code}).")
                     except requests.exceptions.Timeout:
-                        st.error("Error: Request timeout ho gayi. Internet connection check karein ya dobara try karein.")
+                        st.error("Error: Request timeout ho gayi. Dobara try karein.")
                     except Exception as e:
                         st.error(f"Error: {e}")
             else:
