@@ -44,27 +44,37 @@ if api_key:
             else:
                 st.warning("Pehle kuch likhein.")
 
-    # --- Tab 2: Image Generator ---
+    # --- Tab 2: Image Generator (Behtar version) ---
     with tab2:
-        st.subheader("Nayi Tasveer Generate Karein")
-        img_prompt = st.text_area("Tasveer ka tafseel (prompt) likhein (English mein):", 
-                                 placeholder="e.g., A professional SMC trading chart showing breakout")
+        st.subheader("Nayi ICT Chart Tasveer Generate Karein")
+        st.write("Yahan detail mein likhein ke chart par kya dikhana hai.")
         
-        if st.button("Generate Image"):
+        # Default prompt ICT ke liye
+        default_ict_prompt = "A professional forex trading chart, cleancandlestick pattern, showing ICT concepts: Fair Value Gap (FVG) marked as a blue shaded box, Order Block highlighted in light grey, Liquidity Grab with a red arrow, Break of Structure (BOS) labeled, white background, high detail"
+        
+        img_prompt = st.text_area("Tasveer ka tafseel (prompt) likhein:", 
+                                 value=default_ict_prompt,
+                                 height=150)
+        
+        if st.button("Generate ICT Image"):
             if img_prompt:
                 with st.spinner("Tasveer generate ho rahi hai..."):
+                    # Hum Pollinations AI ki free API use kar rahe hain
                     safe_prompt = img_prompt.replace(" ", "%20")
-                    image_url = f"https://image.pollinations.ai/prompt/{safe_prompt}?width=1024&height=768&nologo=true"
+                    # Style aur quality parameters add kiye hain
+                    image_url = f"https://image.pollinations.ai/prompt/{safe_prompt}?width=1280&height=720&nologo=true&model=realism"
                     
                     try:
                         response = requests.get(image_url)
                         if response.status_code == 200:
                             gen_image = Image.open(BytesIO(response.content))
-                            st.image(gen_image, caption=f"Generated: {img_prompt}")
+                            st.image(gen_image, caption=f"Generated: {img_prompt}", use_column_width=True)
+                            
+                            # Download button
                             st.download_button(
-                                label="💾 Download Generated Image",
+                                label="💾 Download Generated ICT Image",
                                 data=response.content,
-                                file_name="viora_generated_image.jpg",
+                                file_name="viora_ict_chart.jpg",
                                 mime="image/jpeg"
                             )
                         else:
@@ -72,7 +82,7 @@ if api_key:
                     except Exception as e:
                         st.error(f"Error: {e}")
             else:
-                st.warning("Pehle tasveer ka prompt likhein.")
+                st.warning("Pehle prompt likhein.")
 
 else:
     st.info("👈 Pehle API Key enter karein.")
