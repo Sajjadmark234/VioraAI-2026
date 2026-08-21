@@ -1,30 +1,53 @@
 import streamlit as st
 import google.generativeai as genai
 
-st.set_page_config(page_title="Viora AI Assistant", page_icon="🤖")
+# Page ki setting
+st.set_page_config(page_title="Viora AI Assistant", page_icon="🤖", layout="centered")
 
 st.title("🤖 Viora AI Assistant")
-st.write("Welcome! Yeh aapka apna AI app hai.")
+st.write("Welcome! Yeh aapka apna chat app hai jo purani baatein yaad rakhta hai.")
 
+# API Key enter karne ki jagah
 api_key = st.text_input("Apni Gemini API Key yahan enter karein:", type="password")
 
 if api_key:
     genai.configure(api_key=api_key)
     try:
-        # Error message ke mutabiq naya model
-        model = genai.GenerativeModel('gemini-3.6-flash')
-        st.success("API Key Connected Successfully! ✅")
+        # Stable model set karein
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
-        user_input = st.text_input("Apna sawal yahan likhein:")
-        if st.button("Ask AI"):
-            if user_input:
-                with st.spinner("AI is thinking..."):
-                    response = model.generate_content(user_input)
-                    st.success("AI Response:")
-                    st.write(response.text)
-            else:
-                st.warning("Pehle kuch type karein!")
+        # Chat history ko yaad rakhne ke liye session state
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
+
+        # Purani sari chat screen par dikhane ke liye loop
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+
+        # Neeche chat input box (jo ek se zyada sawal chalne dega)
+        if prompt := st.chat_input("Yahan apna agla sawal likhein..."):
+            
+            # User ka message screen par dikhayein aur save karein
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.markdown(prompt)
+
+            # AI ka jawab generate karne ke liye
+            with st.chat_message("assistant"):
+                with st.spinner("AI soch raha hai..."):
+                    # History ke sath chat session shuru karna
+                    chat_session = model.start_chat(history=[
+                        {"role": m["role"], "parts": [m["content"]]} for m in st.session_state.messages[:-1]
+                    ])
+                    response = chat_session.send_message(prompt)
+                    ai_reply = response.text
+                    st.markdown(ai_reply)
+            
+            # AI ka jawab bhi history mein save karein
+            st.session_state.messages.append({"role": "assistant", "content": ai_reply})
+
     except Exception as e:
         st.error(f"Error: {e}")
 else:
-    st.info("👈 Pehle upar apni Gemini API Key enter karein taake app khul sake.")
+    st.info("👈 Pehle upar apni Gemini API Key enter karein taake chat shuru ho sake.")
