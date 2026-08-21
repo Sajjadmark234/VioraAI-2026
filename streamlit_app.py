@@ -1,60 +1,46 @@
 import streamlit as st
 import google.generativeai as genai
-import os
 
-st.set_page_config(page_title="Viora AI Pro", page_icon="🤖")
+st.set_page_config(page_title="Viora AI Assistant", page_icon="🤖")
 
-st.title("🤖 Viora AI Pro")
+st.title("Assistant")
+st.write("Welcome! Yeh aapka apna AI app hai.")
 
-# 1. API Key Section
-api_key = st.text_input("Gemini API Key:", type="password")
-
-# 2. Camera aur Save Section (Chat se upar)
-if api_key:
-    # Hum ek expander bana rahe hain taake camera ki jagah alag ho
-    with st.expander("📷 Tasveer Lein aur Save Karein", expanded=False):
-        camera_photo = st.camera_input("Apne device ka camera use karein")
-        
-        if camera_photo is not None:
-            # Tasveer screen par dikhayein
-            st.image(camera_photo, caption="Li gayi tasveer")
-            
-            # Download/Save Button - Yeh zaruri hai taake tasveer gallery mein jaye
-            btn = st.download_button(
-                label="💾 Download/Save Tasveer",
-                data=camera_photo,
-                file_name="viora_captured_photo.jpg",
-                mime="image/jpeg"
-            )
-
-# 3. Chat Section
-else:
-    st.info("👈 Pehle API Key enter karein.")
+# API Key input
+api_key = st.text_input("Apni Gemini API Key yahan enter karein:", type="password")
 
 if api_key:
     genai.configure(api_key=api_key)
+    st.success("API Key Connected Successfully! ✅")
+    
     try:
-        # Model set karein
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # Model set kiya hai
+        model = genai.GenerativeModel('gemini-3.6-flash')
         
-        # Chat history
-        if "messages" not in st.session_state:
-            st.session_state.messages = []
+        # 📷 Yahan Image/Picture Upload ka option hai (Gallery ya Camera se)
+        uploaded_file = st.file_uploader("Tasveer upload karein ya camera se lein:", type=["jpg", "jpeg", "png"])
+        
+        if uploaded_file is not None:
+            st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
 
-        for message in st.session_state.messages:
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"])
-
-        # Chat Input
-        if prompt := st.chat_input("Apna sawal likhein..."):
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            with st.chat_message("user"):
-                st.markdown(prompt)
-
-            with st.chat_message("assistant"):
-                response = model.generate_content(prompt)
-                st.markdown(response.text)
-                st.session_state.messages.append({"role": "assistant", "content": response.text})
+        # Sawal likhne ki jagah
+        user_input = st.text_area("Apna sawal yahan likhein:")
+        
+        if st.button("Ask AI"):
+            if user_input or uploaded_file:
+                with st.spinner("AI jawab de raha hai..."):
+                    # Agar tasveer aur sawal dono hain
+                    if uploaded_file is not None:
+                        response = model.generate_content([user_input, uploaded_file.getvalue()])
+                    else:
+                        response = model.generate_content(user_input)
+                    
+                    st.markdown("### AI Response:")
+                    st.write(response.text)
+            else:
+                st.warning("Pehle kuch likhein ya tasveer upload karein.")
 
     except Exception as e:
         st.error(f"Error: {e}")
+else:
+    st.info("👈 Pehle upar apni API Key enter karein.")
