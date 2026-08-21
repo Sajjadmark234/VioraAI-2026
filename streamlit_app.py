@@ -14,14 +14,14 @@ with col1:
 with col2:
     if st.button("🎙️ Voice Input"):
         st.warning("Voice feature active hai, bolna shuru karein...")
-        # Yahan voice processing code aayega
 
 api_key = st.text_input("Gemini API Key:", type="password")
 
 if api_key:
     genai.configure(api_key=api_key)
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # 100% working model name
+        model = genai.GenerativeModel('gemini-3.6-flash')
         
         if "messages" not in st.session_state:
             st.session_state.messages = []
