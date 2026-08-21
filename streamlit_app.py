@@ -1,28 +1,43 @@
 import streamlit as st
 import google.generativeai as genai
+import os
 
 st.set_page_config(page_title="Viora AI Pro", page_icon="🤖")
 
 st.title("🤖 Viora AI Pro")
 
-# Buttons for Camera and Voice
-col1, col2 = st.columns(2)
-with col1:
-    if st.button("📷 Open Camera"):
-        st.warning("Camera feature ke liye device permissions allow karein.")
-        picture = st.camera_input("Take a photo")
-with col2:
-    if st.button("🎙️ Voice Input"):
-        st.warning("Voice feature active hai, bolna shuru karein...")
-
+# 1. API Key Section
 api_key = st.text_input("Gemini API Key:", type="password")
+
+# 2. Camera aur Save Section (Chat se upar)
+if api_key:
+    # Hum ek expander bana rahe hain taake camera ki jagah alag ho
+    with st.expander("📷 Tasveer Lein aur Save Karein", expanded=False):
+        camera_photo = st.camera_input("Apne device ka camera use karein")
+        
+        if camera_photo is not None:
+            # Tasveer screen par dikhayein
+            st.image(camera_photo, caption="Li gayi tasveer")
+            
+            # Download/Save Button - Yeh zaruri hai taake tasveer gallery mein jaye
+            btn = st.download_button(
+                label="💾 Download/Save Tasveer",
+                data=camera_photo,
+                file_name="viora_captured_photo.jpg",
+                mime="image/jpeg"
+            )
+
+# 3. Chat Section
+else:
+    st.info("👈 Pehle API Key enter karein.")
 
 if api_key:
     genai.configure(api_key=api_key)
     try:
-        # 100% working model name
-        model = genai.GenerativeModel('gemini-3.6-flash')
+        # Model set karein
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
+        # Chat history
         if "messages" not in st.session_state:
             st.session_state.messages = []
 
@@ -30,6 +45,7 @@ if api_key:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
 
+        # Chat Input
         if prompt := st.chat_input("Apna sawal likhein..."):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
