@@ -17,11 +17,12 @@ if api_key:
         # Model set kiya hai
         model = genai.GenerativeModel('gemini-3.6-flash')
         
-        # 📷 Yahan Image/Picture Upload ka option hai (Gallery ya Camera se)
+        # 📷 Tasveer upload karne ka option
         uploaded_file = st.file_uploader("Tasveer upload karein ya camera se lein:", type=["jpg", "jpeg", "png"])
         
         if uploaded_file is not None:
-            st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
+            # Yahan use_container_width use kiya hai taake error na aaye
+            st.image(uploaded_file, caption="Uploaded Image", use_container_width=True)
 
         # Sawal likhne ki jagah
         user_input = st.text_area("Apna sawal yahan likhein:")
