@@ -8,7 +8,7 @@ from io import BytesIO
 st.set_page_config(page_title="Viora AI Generator", page_icon="🤖")
 
 st.title("🤖 Viora AI Image Generator")
-st.write("Welcome! Yahan aap apne prompts se tasveeren generate karwa sakte hain.")
+st.write("Welcome! Yahan aap chart analysis aur image generate karwa sakte hain.")
 
 # API Key input
 api_key = st.text_input("Apni Gemini API Key yahan enter karein:", type="password")
@@ -16,13 +16,13 @@ api_key = st.text_input("Apni Gemini API Key yahan enter karein:", type="passwor
 if api_key:
     genai.configure(api_key=api_key)
     
-    # Tabs banate hain taake aap Text Assistant aur Image Generator dono use kar sakein
+    # Tabs banate hain
     tab1, tab2 = st.tabs(["💬 Chart Analysis (Text)", "🖼️ Image Generator"])
     
-    # --- Tab 1: Gemini Text Assistant (Pehle wala kam) ---
+    # --- Tab 1: Gemini Text Assistant ---
     with tab1:
         st.subheader("Chart Analysis Assistant")
-        uploaded_file = st.file_uploader("Analysis ke liye chart upload karein (optional):", type=["jpg", "jpeg", "png"])
+        uploaded_file = st.file_uploader("Analysis ke liye chart upload karein:", type=["jpg", "jpeg", "png"])
         
         image = None
         if uploaded_file is not None:
@@ -44,16 +44,15 @@ if api_key:
             else:
                 st.warning("Pehle kuch likhein.")
 
-    # --- Tab 2: Image Generator (Naya Feature) ---
+    # --- Tab 2: Image Generator ---
     with tab2:
         st.subheader("Nayi Tasveer Generate Karein")
-        img_prompt = st.text_area("Tasveer ka tafseel (prompt) likhein (English mein behtar hai):", 
-                                 placeholder="e.g., A professional SMC trading chart of EURUSD showing a break of structure and imbalance")
+        img_prompt = st.text_area("Tasveer ka tafseel (prompt) likhein (English mein):", 
+                                 placeholder="e.g., A professional SMC trading chart showing breakout")
         
         if st.button("Generate Image"):
             if img_prompt:
                 with st.spinner("Tasveer generate ho rahi hai..."):
-                    # Hum Pollinations AI ki free API use kar rahe hain taake aapko tasveer mile
                     safe_prompt = img_prompt.replace(" ", "%20")
                     image_url = f"https://image.pollinations.ai/prompt/{safe_prompt}?width=1024&height=768&nologo=true"
                     
@@ -62,7 +61,6 @@ if api_key:
                         if response.status_code == 200:
                             gen_image = Image.open(BytesIO(response.content))
                             st.image(gen_image, caption=f"Generated: {img_prompt}", use_column_width=True)
-                            # Download button bhi de rahe hain
                             st.download_button(
                                 label="💾 Download Generated Image",
                                 data=response.content,
